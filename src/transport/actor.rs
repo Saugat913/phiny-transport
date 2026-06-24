@@ -107,7 +107,7 @@ impl TransportActor {
                     handle.send(data).await;
                 }
             }
-            _ => {}
+            TransportMessage::Shutdown => unreachable!(),
         }
     }
 

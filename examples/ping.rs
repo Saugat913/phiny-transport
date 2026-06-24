@@ -4,7 +4,6 @@ use phiny_transport::{TransportBuilder, TransportEvent};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    env_logger::init();
     let transport = TransportBuilder::new().build().await?;
     let node_id = transport.get_node_id().await;
 
@@ -34,7 +33,6 @@ async fn main() -> anyhow::Result<()> {
             match event {
                 TransportEvent::DataReceived(peer, _) => {
                     transport.send_to(b"pong".to_vec().into(), peer).await;
-                    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
                     break;
                 }
                 _ => {}
