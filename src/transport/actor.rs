@@ -63,6 +63,9 @@ impl TransportActor {
                 match msg {
                     TransportMessage::Shutdown => {
                         actor.endpoint.close().await;
+                        for connection in actor.connections.iter() {
+                            connection.value().shutdown().await;
+                        }
                         break;
                     }
                     _ => {
@@ -111,27 +114,31 @@ impl TransportActor {
     async fn handle_connect(&self, peer_id: String) {
         info!("Connecting to peer: {}", peer_id);
         match peer_id.parse::<EndpointId>() {
-            Ok(node_id) => match self.endpoint.connect(node_id, ALPN).await {
-                Ok(connection) => {
-                    let handle = ConnectionActor::spawn(
-                        connection,
-                        peer_id.clone(),
-                        self.event_tx.clone(),
-                        true,
-                    )
-                    .await
-                    .unwrap();
-                    self.connections.insert(peer_id.clone(), handle);
-                    let _ = self
-                        .event_tx
-                        .send(TransportEvent::NewConnectionArrived(peer_id));
+            Ok(node_id) => {
+                info!("Parsed node ID: {:?}", node_id);
+                let conn = self.endpoint.connect(node_id, ALPN).await;
+                match conn {
+                    Ok(connection) => {
+                        let handle = ConnectionActor::spawn(
+                            connection,
+                            peer_id.clone(),
+                            self.event_tx.clone(),
+                            true,
+                        )
+                        .await
+                        .unwrap();
+                        self.connections.insert(peer_id.clone(), handle);
+                        let _ = self
+                            .event_tx
+                            .send(TransportEvent::NewConnectionArrived(peer_id));
+                    }
+                    Err(e) => {
+                        let _ = self.event_tx.send(TransportEvent::Error(format!(
+                            "connect failed: {e}"
+                        )));
+                    }
                 }
-                Err(e) => {
-                    let _ = self
-                        .event_tx
-                        .send(TransportEvent::Error(format!("connect failed: {e}")));
-                }
-            },
+            }
             Err(e) => {
                 let _ = self
                     .event_tx
