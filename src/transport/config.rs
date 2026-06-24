@@ -1,12 +1,12 @@
 #[derive(Debug, Clone)]
 pub struct TransportConfig {
-   pub endpoint_id:Option<String>,
+   pub secret_key:Option<[u8; 32]>,
 }
 
 impl Default for TransportConfig {
     fn default() -> Self {
         Self {
-            endpoint_id: None,
+            secret_key: None,
         }
     }
 }

@@ -11,8 +11,9 @@ impl TransportBuilder {
         }
     }
 
-    pub fn with_endpoint_id(mut self, endpoint_id: String) -> Self {
-        self.config.endpoint_id = Some(endpoint_id);
+    pub fn with_secret_key(mut self, secret_key: String) -> Self {
+        let secret_key = secret_key.as_bytes().try_into().unwrap();
+        self.config.secret_key = Some(secret_key);
         self
     }
 
