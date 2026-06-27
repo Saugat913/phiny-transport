@@ -45,6 +45,11 @@ impl TransportActor {
                 info!("Accepted connection from: {:?}", incoming);
                 let connection = incoming.await.unwrap();
                 let peer_id = connection.remote_id().to_string();
+                if let Some(handle) = connections_cloned.get(&peer_id) {
+                    info!("Connection already exists for peer: {}", peer_id);
+                    let handle= &*handle;
+                    handle.shutdown().await;
+                }
                 let handle = ConnectionActor::spawn(
                     connection,
                     peer_id.clone(),
@@ -92,6 +97,9 @@ impl TransportActor {
         match message {
             TransportMessage::GetNodeId(tx) => {
                 let _ = tx.send(self.endpoint.id().to_string());
+            }
+            TransportMessage::GetSecretKey(tx) => {
+                let _ = tx.send(self.endpoint.secret_key().to_bytes().to_vec());
             }
             TransportMessage::Connect(peer_id) => self.handle_connect(peer_id).await,
             TransportMessage::Disconnect(peer_id) => {

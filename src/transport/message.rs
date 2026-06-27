@@ -2,13 +2,16 @@ use bytes::Bytes;
 use tokio::sync::oneshot;
 
 pub enum TransportMessage {
+    /// Get the node ID as a string
     GetNodeId(oneshot::Sender<String>),
-    //connect to specific peer
+    /// Get the secret key as bytes
+    GetSecretKey(oneshot::Sender<Vec<u8>>),
+    /// Connect to a specific peer
     Connect(String),
-    //disconnect from specific peer
+    /// Disconnect from a specific peer
     Disconnect(String),
-    //send data to specific peer
+    /// Send data to a specific peer
     Send(String, Bytes),
-    //shutdown the transport
+    /// Shutdown the transport
     Shutdown,
 }

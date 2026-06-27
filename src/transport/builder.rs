@@ -11,8 +11,8 @@ impl TransportBuilder {
         }
     }
 
-    pub fn with_secret_key(mut self, secret_key: String) -> Self {
-        let secret_key = secret_key.as_bytes().try_into().unwrap();
+    pub fn with_secret_key(mut self, secret_key: Vec<u8>) -> Self {
+        let secret_key = secret_key.try_into().unwrap();
         self.config.secret_key = Some(secret_key);
         self
     }

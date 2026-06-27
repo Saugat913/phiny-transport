@@ -45,4 +45,12 @@ impl TransportHandle {
             .unwrap();
         rx.await.unwrap()
     }
+    pub async fn get_secret_key(&self) -> Vec<u8> {
+        let (tx, rx) = tokio::sync::oneshot::channel();
+        self.message_channel
+            .send(TransportMessage::GetSecretKey(tx))
+            .await
+            .unwrap();
+        rx.await.unwrap()
+    }
 }
